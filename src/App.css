@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .App {
   text-align: center;
 }
@@ -35,4 +39,9 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* App.css */
+.min-h-screen {
+  min-height: 100vh;
 }
