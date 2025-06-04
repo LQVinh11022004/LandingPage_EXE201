@@ -7,7 +7,9 @@ import Download from './components/Download';
 import Dashboard from './components/Dashboard';
 import { AuthProvider, AuthContext } from './components/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import Experts from './components/Experts';
 import Login from './components/Login';
+import ServicePackage from './components/ServicePackage';
 import './App.css';
 
 function App() {
@@ -19,35 +21,33 @@ function App() {
           <Route
             path="/"
             element={
-                <><Hero /><Features /><Download /></>
+              <>
+                <Hero />
+                <Features />
+                <Download />
+              </>
             }
           />
           <Route path="/features" element={<Features />} />
           <Route path="/download" element={<Download />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="experts" element={<Experts />} />
+          <Route path="service-packages" element={<ServicePackage />} />
+        </Route>
         </Routes>
       </Router>
     </AuthProvider>
   );
 }
 
-// Component to redirect unauthenticated users to login
-const AuthRedirect = ({ children }) => {
-  const { isAuthenticated, loading } = useContext(AuthContext);
 
-  if (loading) {
-    return <div className="min-h-screen bg-pink-50 flex items-center justify-center">Loading...</div>;
-  }
-
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
 
 export default App;
