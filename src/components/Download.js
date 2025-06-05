@@ -40,7 +40,7 @@ const Download = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-6 text-sm text-gray-500"
         >
-          <p>Phiên bản 1.0.0 | Kích thước: 50MB | Cập nhật: 02/06/2025</p>
+          <p> Kích thước: 52.1 MB | Cập nhật: 02/06/2025</p>
         </motion.div>
       </div>
     </section>
