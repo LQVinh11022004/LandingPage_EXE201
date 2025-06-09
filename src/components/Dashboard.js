@@ -4,10 +4,36 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import { FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import Sidebar from './Sidebar';
+import { Bar, Pie, Line } from 'react-chartjs-2'; // Import multiple chart types
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [accounts, setAccounts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [totalItemsCount, setTotalItemsCount] = useState(0);
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize] = useState(10);
@@ -21,6 +47,8 @@ const Dashboard = () => {
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [sex, setSex] = useState('');
+  const [month, setMonth] = useState(6); // Default to current month (June)
+  const [year, setYear] = useState(2025); // Default to current year
 
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -32,6 +60,7 @@ const Dashboard = () => {
       return;
     }
     fetchAccountData();
+    fetchTransactionDashboard();
 
     const handleResize = () => {
       setIsSidebarOpen(window.innerWidth >= 768);
@@ -97,6 +126,47 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Fetch error:', error);
       setErrorMessage('Network error. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTransactionDashboard = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://localhost:7015/api/payment/transaction/dashboard?month=${month}&year=${year}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Transaction API Response Status:', response.status);
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (e) {
+        responseData = {};
+      }
+
+      if (response.ok) {
+        setTransactions(responseData.transactions || []);
+      } else {
+        let errorMsg = 'Failed to fetch transaction dashboard';
+        setErrorMessage(errorMsg);
+      }
+    } catch (error) {
+      console.error('Transaction fetch error:', error);
+      setErrorMessage('Network error. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -219,6 +289,60 @@ const Dashboard = () => {
     return 'Dashboard';
   };
 
+  const handleMonthChange = (e) => {
+    setMonth(parseInt(e.target.value));
+    fetchTransactionDashboard();
+  };
+
+  const handleYearChange = (e) => {
+    setYear(parseInt(e.target.value));
+    fetchTransactionDashboard();
+  };
+
+  // Prepare chart data
+  const barData = {
+    labels: transactions.map(t => t.type || 'Unknown'),
+    datasets: [{
+      label: 'Amount (VND)',
+      data: transactions.map(t => t.amount),
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+      borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+      borderWidth: 1
+    }]
+  };
+
+  const pieData = {
+    labels: transactions.map(t => `${t.transferAccountName} (${t.amount} VND)`),
+    datasets: [{
+      data: transactions.map(t => t.amount),
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+      borderColor: ['#FFFFFF'],
+      borderWidth: 1
+    }]
+  };
+
+  const lineData = {
+    labels: transactions.map(t => new Date(t.createdTime).toLocaleDateString()),
+    datasets: [{
+      label: 'Total Amount (VND)',
+      data: transactions.map(t => t.amount),
+      fill: false,
+      borderColor: '#36A2EB',
+      tension: 0.1
+    }]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Transaction Overview' }
+    },
+    scales: {
+      y: { beginAtZero: true }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header className="bg-gradient-to-r from-pink-600 to-pink-800 text-white shadow-md fixed top-0 left-0 right-0 z-30">
@@ -262,11 +386,62 @@ const Dashboard = () => {
               </motion.h1>
 
               <div className="max-w-6xl mx-auto">
+                {/* Transaction Dashboard Section */}
                 <div className="bg-white p-6 rounded-xl shadow-lg mb-6">
-                  <h3 className="text-lg font-semibold text-pink-700 mb-3">Overview</h3>
-                  <p className="text-gray-700">Total Accounts: <span className="font-medium">{totalItemsCount}</span></p>
+                  <h3 className="text-lg font-semibold text-pink-700 mb-3">Transaction Dashboard</h3>
+                  <div className="mb-4 flex space-x-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                      <input
+                        type="number"
+                        value={month}
+                        onChange={handleMonthChange}
+                        min="1"
+                        max="12"
+                        className="w-20 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                      <input
+                        type="number"
+                        value={year}
+                        onChange={handleYearChange}
+                        min="2000"
+                        max="2100"
+                        className="w-24 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      />
+                    </div>
+                  </div>
+                  {transactions.length > 0 && (
+                    <div>
+                      <h4 className="text-md font-medium text-gray-700 mb-2">Charts</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Bar Chart */}
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h5 className="text-sm font-semibold text-gray-600 mb-2">Amount by Type</h5>
+                          <Bar data={barData} options={chartOptions} />
+                        </div>
+                        {/* Pie Chart */}
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h5 className="text-sm font-semibold text-gray-600 mb-2">Transaction Distribution</h5>
+                          <Pie data={pieData} options={chartOptions} />
+                        </div>
+                        {/* Line Chart */}
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h5 className="text-sm font-semibold text-gray-600 mb-2">Amount Trend</h5>
+                          <Line data={lineData} options={chartOptions} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {errorMessage && (
+                    <div className="mb-4 text-red-500 bg-red-100 p-4 rounded-lg text-center">{errorMessage}</div>
+                  )}
+                  {isLoading && <div className="text-center text-gray-600">Loading...</div>}
                 </div>
 
+                {/* Existing Accounts Section */}
                 <h3 className="text-lg font-semibold text-pink-700 mb-4">Accounts List</h3>
                 {errorMessage && (
                   <div className="mb-4 text-red-500 bg-red-100 p-4 rounded-lg text-center">{errorMessage}</div>
