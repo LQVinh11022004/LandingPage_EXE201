@@ -54,7 +54,7 @@ const ServicePackage = () => {
     if (pagingPackageEnum) queryParams.append('pagingPackageEnum', pagingPackageEnum);
 
     try {
-      const response = await fetch(`https://localhost:7015/api/service-package?${queryParams}`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/service-package?${queryParams}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -117,7 +117,7 @@ const ServicePackage = () => {
     }
 
     try {
-      const response = await fetch(`https://localhost:7015/api/service-package`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/service-package`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -169,7 +169,7 @@ const ServicePackage = () => {
     }
 
     try {
-      const response = await fetch(`https://localhost:7015/api/service-package/${id}`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/service-package/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

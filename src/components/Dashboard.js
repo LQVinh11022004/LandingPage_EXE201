@@ -85,7 +85,7 @@ const Dashboard = () => {
     });
 
     try {
-      const response = await fetch(`https://localhost:7015/api/account?${queryParams}`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/account?${queryParams}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -141,7 +141,7 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`https://localhost:7015/api/payment/transaction/dashboard?month=${month}&year=${year}`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/payment/transaction/dashboard?month=${month}&year=${year}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -182,7 +182,7 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`https://localhost:7015/api/account/${id}`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/account/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

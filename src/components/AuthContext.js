@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userName, password, navigate) => {
     try {
-      const response = await fetch('https://localhost:7015/api/authen/login', {
+      const response = await fetch('https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/authen/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userName, password }),

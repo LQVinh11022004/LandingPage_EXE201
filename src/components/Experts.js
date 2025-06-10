@@ -41,7 +41,7 @@ const Experts = () => {
     });
 
     try {
-      const response = await fetch(`https://localhost:7015/api/expert?${queryParams}`, {
+      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/expert?${queryParams}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
