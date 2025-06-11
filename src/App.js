@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import Download from './components/Download';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/dashboard/Dashboard';
 import { AuthProvider, AuthContext } from './components/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Experts from './components/Experts';
