@@ -15,7 +15,10 @@ const Navbar = () => {
           transition={{ duration: 0.5 }}
           className="text-2xl font-bold flex items-center"
         >
-          <span role="img" aria-label="baby">🍼</span> Mom&Baby
+          <span role="img" aria-label="baby">
+            <img src="./logo_exe201.jpg" alt="logo" className="h-10 w-auto" /> {/* Thu nhỏ logo */}
+          </span> 
+          Mom&Baby
         </motion.div>
         <div className="md:hidden">
           <button onClick={toggleMenu} className="focus:outline-none">
@@ -29,7 +32,6 @@ const Navbar = () => {
           <li><Link to="/features" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Sản phẩm</Link></li>
           <li><Link to="/download" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Tải Ứng Dụng</Link></li>
           <li><Link to="/dashboard" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Dashboard</Link></li>
-    
         </ul>
       </div>
     </nav>
