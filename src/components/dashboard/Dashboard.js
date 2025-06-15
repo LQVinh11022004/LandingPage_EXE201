@@ -1,3 +1,4 @@
+// Dashboard.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
@@ -6,12 +7,16 @@ import TransactionDashboard from './TransactionDashboard';
 import AccountsTable from './AccountsTable';
 import UpdateModal from './UpdateModal';
 import Sidebar from '../Sidebar';
+import { debounce } from 'lodash';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net';
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [total, setTotal] = useState(0); // Thêm state total
+  const [adminDashboardData, setAdminDashboardData] = useState({ feedbacks: [], feedbackCount: 0, userPayPackageCount: 0 });
+  const [total, setTotal] = useState(0);
   const [totalItemsCount, setTotalItemsCount] = useState(0);
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize] = useState(10);
@@ -25,8 +30,8 @@ const Dashboard = () => {
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [sex, setSex] = useState('');
-  const [month, setMonth] = useState(6); // Default to June
-  const [year, setYear] = useState(2025); // Default to current year
+  const [month, setMonth] = useState(6);
+  const [year, setYear] = useState(2025);
 
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -39,13 +44,17 @@ const Dashboard = () => {
     }
     fetchAccountData();
     fetchTransactionDashboard();
+    fetchAdminDashboard();
 
-    const handleResize = () => {
+    const handleResize = debounce(() => {
       setIsSidebarOpen(window.innerWidth >= 768);
-    };
+    }, 100);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isAuthenticated, navigate, pageIndex]);
+    return () => {
+      handleResize.cancel();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isAuthenticated, navigate, pageIndex, month, year]);
 
   const fetchAccountData = async (newPageIndex = pageIndex) => {
     setIsLoading(true);
@@ -63,7 +72,7 @@ const Dashboard = () => {
     });
 
     try {
-      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/account?${queryParams}`, {
+      const response = await fetch(`${API_BASE_URL}/api/account?${queryParams}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -71,7 +80,10 @@ const Dashboard = () => {
         },
       });
 
-      let responseData = await response.json().catch(() => ({}));
+      let responseData = await response.json().catch((err) => {
+        console.error('JSON parsing error:', err);
+        return {};
+      });
 
       if (response.ok) {
         setAccounts(responseData.items || []);
@@ -107,7 +119,7 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/payment/transaction/dashboard?month=${month}&year=${year}`, {
+      const response = await fetch(`${API_BASE_URL}/api/payment/transaction/dashboard?month=${month}&year=${year}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -115,20 +127,52 @@ const Dashboard = () => {
         },
       });
 
-      let responseData = await response.json().catch(() => ({}));
-      console.log('Transaction Dashboard Response:', responseData); // Debug log
+      let responseData = await response.json().catch((err) => {
+        console.error('JSON parsing error:', err);
+        return {};
+      });
 
       if (response.ok) {
         setTransactions(responseData.transactions || []);
-        setTotal(responseData.total || 0); // Gán total từ response
+        setTotal(responseData.total || 0);
       } else {
         setErrorMessage('Failed to fetch transaction dashboard');
       }
     } catch (error) {
       setErrorMessage('Network error. Please try again.');
-      console.error('Fetch transaction error:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchAdminDashboard = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      let responseData = await response.json().catch((err) => {
+        console.error('JSON parsing error:', err);
+        return {};
+      });
+
+      if (response.ok) {
+        setAdminDashboardData(responseData);
+      } else {
+        setErrorMessage('Failed to fetch admin dashboard data');
+      }
+    } catch (error) {
+      setErrorMessage('Network error. Please try again.');
     }
   };
 
@@ -143,7 +187,7 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/account/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/account/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -152,7 +196,10 @@ const Dashboard = () => {
         body: JSON.stringify(body),
       });
 
-      let responseData = await response.json().catch(() => ({}));
+      let responseData = await response.json().catch((err) => {
+        console.error('JSON parsing error:', err);
+        return {};
+      });
 
       if (response.ok) {
         setErrorMessage('Account updated successfully!');
@@ -184,9 +231,12 @@ const Dashboard = () => {
           <Outlet />
           {location.pathname === '/dashboard' && (
             <>
+              {accounts.length === 0 && !isLoading && !errorMessage && (
+                <div className="text-center text-gray-600 mt-4">No accounts available.</div>
+              )}
               <TransactionDashboard
                 transactions={transactions}
-                total={total} // Truyền total qua props
+                total={total}
                 month={month}
                 year={year}
                 setMonth={setMonth}
@@ -194,6 +244,7 @@ const Dashboard = () => {
                 fetchTransactionDashboard={fetchTransactionDashboard}
                 errorMessage={errorMessage}
                 isLoading={isLoading}
+                adminDashboardData={adminDashboardData}
               />
               <AccountsTable
                 accounts={accounts}
