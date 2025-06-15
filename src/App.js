@@ -10,6 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Experts from './components/Experts';
 import Login from './components/Login';
 import ServicePackage from './components/ServicePackage';
+import Success from './components/Success';
+import Cancel from './components/Cancel';
 import './App.css';
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
           <Route path="/features" element={<Features />} />
           <Route path="/download" element={<Download />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Cancel />} />
           <Route
           path="/dashboard"
           element={
