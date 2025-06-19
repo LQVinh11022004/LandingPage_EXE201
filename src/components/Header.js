@@ -29,7 +29,7 @@ const Navbar = () => {
         </div>
         <ul className={`md:flex md:space-x-6 ${isOpen ? 'block' : 'hidden'} md:block absolute md:static top-16 left-0 w-full md:w-auto bg-pink-100 md:bg-transparent p-4 md:p-0 transition-all duration-300`}>
           <li><Link to="/" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Trang chủ</Link></li>
-          <li><Link to="/features" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Sản phẩm</Link></li>
+          {/* <li><Link to="/features" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Sản phẩm</Link></li> */}
           <li><Link to="/download" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Tải Ứng Dụng</Link></li>
           <li><Link to="/dashboard" className="block py-2 md:py-0 hover:text-pink-500 transition-colors">Dashboard</Link></li>
         </ul>

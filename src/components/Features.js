@@ -11,6 +11,26 @@ const Features = () => {
   return (
     <section id="features" className="py-20 bg-pink-50">
       <div className="container mx-auto px-4">
+        {/* Hình ảnh minh họa đầu section */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="mb-12 flex justify-center gap-4"
+        >
+          <img
+            src="./momandbaby.jpg"
+            alt="Mẹ và bé"
+            className="h-auto w-1/2 object-cover rounded-lg"
+            loading="lazy"
+          />
+          <img
+            src="./heart.jpg"
+            alt="Trái tim"
+            className="h-auto w-1/2 object-cover rounded-lg"
+            loading="lazy"
+          />
+        </motion.div>
         <motion.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

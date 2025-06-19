@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    <section id="home" className="bg-gradient-to-r from-pink-300 to-rose-400 text-white py-20">
-      <div className="container mx-auto text-center px-4">
+    <section id="home" className="bg-gradient-to-r from-pink-300 to-rose-400 text-white py-20 relative overflow-hidden">
+      <div className="container mx-auto text-center px-4 relative z-10">
         <motion.h1
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -31,6 +31,7 @@ const Hero = () => {
         </motion.button>
       </div>
     </section>
+    
   );
 };
 

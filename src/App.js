@@ -12,6 +12,7 @@ import Login from './components/Login';
 import ServicePackage from './components/ServicePackage';
 import Success from './components/Success';
 import Cancel from './components/Cancel';
+import Footer from './components/Footer';
 import './App.css';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
                 <Hero />
                 <Features />
                 <Download />
+                <Footer/>
               </>
             }
           />
