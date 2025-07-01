@@ -26,7 +26,7 @@ const Download = () => {
               Tải Ngay
             </a>
             <div className="mt-6 text-sm text-gray-500">
-              <p>Kích thước: 54.3 MB | Cập nhật: 25/06/2025</p>
+              <p>Kích thước: 55 MB | Cập nhật: 01/07/2025</p>
             </div>
           </motion.div>
           <motion.div
