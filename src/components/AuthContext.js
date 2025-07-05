@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode'; // đúng cú pháp cho v4+
 
 export const AuthContext = createContext();
 
@@ -16,20 +17,38 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userName, password, navigate) => {
     try {
-      const response = await fetch('https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/authen/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userName, password }),
-      });
-      console.log('API Response Status:', response.status);
+      const response = await fetch(
+        'https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/authen/login',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userName, password }),
+        }
+      );
+
+
       let responseData;
       try {
         responseData = await response.json();
       } catch (e) {
         responseData = {};
       }
+
       if (response.ok) {
-        localStorage.setItem('authToken', responseData.token);
+        const token = responseData.accessToken; // ✅ lấy token đúng từ accessToken
+
+        if (!token || typeof token !== 'string') {
+          throw new Error('Invalid token received from server.');
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userRole = decodedToken.role;
+
+        if (userRole !== 'ADMIN') {
+          throw new Error('Access denied: Only ADMIN users can log in.');
+        }
+
+        localStorage.setItem('authToken', token);
         setIsAuthenticated(true);
         navigate('/dashboard');
       } else {

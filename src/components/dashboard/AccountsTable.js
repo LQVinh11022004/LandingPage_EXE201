@@ -18,7 +18,7 @@ const AccountsTable = ({ accounts, isLoading, errorMessage, pageIndex, totalPage
             <thead>
               <tr className="bg-pink-50 text-pink-600">
                 <th className="p-4 text-left font-semibold">Full Name</th>
-                <th className="p-4 text-left font-semibold">Sex</th>
+                <th className="p-4 text-left font-semibold">Gender</th>
                 <th className="p-4 text-left font-semibold">Status</th>
                 <th className="p-4 text-left font-semibold">Expert</th>
                 <th className="p-4 text-left font-semibold">Actions</th>
