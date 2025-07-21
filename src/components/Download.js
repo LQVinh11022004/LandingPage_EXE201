@@ -19,14 +19,14 @@ const Download = () => {
               Khám phá nhật ký mẹ bầu, kết nối với bác sĩ, và đọc blog hữu ích ngay trên ứng dụng của bạn!
             </p>
             <a
-              href="/apk/app-release.apk"
+              href="/apk/Mom&Baby.apk"
               download
               className="inline-block bg-pink-500 text-white font-semibold py-3 px-8 rounded-full hover:bg-pink-600 transition transform hover:scale-105"
             >
               Tải Ngay
             </a>
             <div className="mt-6 text-sm text-gray-500">
-              <p>Kích thước: 55 MB | Cập nhật: 01/07/2025</p>
+              <p>Kích thước: 55 MB | Cập nhật: 21/07/2025</p>
             </div>
           </motion.div>
           <motion.div
