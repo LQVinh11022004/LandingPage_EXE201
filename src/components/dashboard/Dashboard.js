@@ -9,7 +9,7 @@ import UpdateModal from './UpdateModal';
 import Sidebar from '../Sidebar';
 import { debounce } from 'lodash';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://momandbaby-exe201.onrender.com';
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);

@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (userName, password, navigate) => {
     try {
       const response = await fetch(
-        'https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/authen/login',
+        'https://momandbaby-exe201.onrender.com/api/authen/login',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

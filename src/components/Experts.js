@@ -50,7 +50,7 @@ const Experts = () => {
     }
 
     try {
-      const response = await fetch(`https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/expert?${queryParams}`, {
+      const response = await fetch(`https://momandbaby-exe201.onrender.com/api/expert?${queryParams}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -116,7 +116,7 @@ const Experts = () => {
 
     // Prepare the URL with status as a query parameter
     const queryParams = new URLSearchParams({ status: status === 'Baned' ? 'Banned' : status });
-    const url = `https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net/api/admin/expert/${id}?${queryParams}`;
+    const url = `https://momandbaby-exe201.onrender.com/api/admin/expert/${id}?${queryParams}`;
 
     try {
       console.log('Sending Update Request - URL:', url);

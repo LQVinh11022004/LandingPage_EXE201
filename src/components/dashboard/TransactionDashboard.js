@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Calendar, DollarSign, Star, Users, TrendingUp, Activity } from 'lucide-react';
 
-const API_BASE_URL = 'https://mom-and-baby-e7dnhsgjcpgdb8cc.southeastasia-01.azurewebsites.net';
+const API_BASE_URL = 'https://momandbaby-exe201.onrender.com';
 
 const Dashboard = () => {
   const [transactionData, setTransactionData] = useState([]);
