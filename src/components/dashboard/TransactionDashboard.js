@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
-import { Calendar, DollarSign, Star, Users, TrendingUp, Activity } from 'lucide-react';
+import { Calendar, DollarSign, Star, Users, TrendingUp, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const API_BASE_URL = 'https://momandbaby-exe201.onrender.com';
 
@@ -14,10 +14,19 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [month, setMonth] = useState(6);
   const [year, setYear] = useState(2025);
+  
+  // Pagination state for transactions
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 10;
 
   useEffect(() => {
     fetchDashboardData();
   }, [month, year]);
+
+  // Reset pagination when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rawTransactions]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -78,29 +87,42 @@ const Dashboard = () => {
   };
 
   const processTransactionData = (transactions) => {
-    setRawTransactions(transactions);
+    // Sort transactions by date (newest first for display, but we'll sort chart data separately)
+    const sortedTransactions = [...transactions].sort((a, b) => 
+      new Date(b.createdTime) - new Date(a.createdTime)
+    );
+    setRawTransactions(sortedTransactions);
     
-    // Group transactions by date
+    // Group transactions by date for chart
     const dailyRevenue = transactions.reduce((acc, transaction) => {
-      const date = new Date(transaction.createdTime).toLocaleDateString('vi-VN', {
+      const date = new Date(transaction.createdTime);
+      const dateKey = date.toLocaleDateString('vi-VN', {
         day: '2-digit',
         month: '2-digit'
       });
-      if (!acc[date]) {
-        acc[date] = { date, revenue: 0, count: 0 };
+      
+      if (!acc[dateKey]) {
+        acc[dateKey] = { 
+          date: dateKey, 
+          revenue: 0, 
+          count: 0,
+          timestamp: date // Keep timestamp for proper sorting
+        };
       }
-      acc[date].revenue += transaction.amount;
-      acc[date].count += 1;
+      acc[dateKey].revenue += transaction.amount;
+      acc[dateKey].count += 1;
       return acc;
     }, {});
 
+    // Sort by actual date (oldest to newest for chart display)
     const sortedData = Object.values(dailyRevenue).sort((a, b) => {
-      const [dayA, monthA] = a.date.split('/');
-      const [dayB, monthB] = b.date.split('/');
-      return new Date(`2025-${monthA}-${dayA}`) - new Date(`2025-${monthB}-${dayB}`);
+      return a.timestamp - b.timestamp;
     });
 
-    setTransactionData(sortedData);
+    // Remove timestamp from final data (not needed for chart display)
+    const chartData = sortedData.map(({ timestamp, ...rest }) => rest);
+    
+    setTransactionData(chartData);
   };
 
   const processFeedbackData = (feedbacks) => {
@@ -156,6 +178,18 @@ const Dashboard = () => {
       style: 'currency',
       currency: 'VND'
     }).format(value);
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(rawTransactions.length / transactionsPerPage);
+  const startIndex = (currentPage - 1) * transactionsPerPage;
+  const endIndex = startIndex + transactionsPerPage;
+  const currentTransactions = rawTransactions.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -378,46 +412,119 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent Transactions Table */}
+        {/* All Transactions Table with Pagination */}
         <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Giao dịch gần đây</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-gray-800">
+              Tất cả giao dịch ({rawTransactions.length} giao dịch)
+            </h3>
+            <div className="text-sm text-gray-600">
+              Hiển thị {startIndex + 1}-{Math.min(endIndex, rawTransactions.length)} trong tổng số {rawTransactions.length} giao dịch
+            </div>
+          </div>
+          
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Thời gian</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Số tiền</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Tài khoản</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Trạng thái</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">STT</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Thời gian</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số tiền</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Tài khoản</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã GD</th>
                 </tr>
               </thead>
               <tbody>
-                {rawTransactions.slice(0, 5).map((transaction) => (
+                {currentTransactions.map((transaction, index) => (
                   <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-2 text-sm text-gray-900">
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {startIndex + index + 1}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
                       {new Date(transaction.createdTime).toLocaleString('vi-VN')}
                     </td>
-                    <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
                       {formatCurrency(transaction.amount)}
                     </td>
-                    <td className="px-4 py-2 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm text-gray-600">
                       {transaction.transferAccountName}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         {transaction.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500 font-mono">
+                      {transaction.id || 'N/A'}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Trước
+                </button>
+                
+                <div className="flex space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => goToPage(pageNum)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          currentPage === pageNum
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Sau
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
+              
+              <div className="text-sm text-gray-700">
+                Trang {currentPage} / {totalPages}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Feedback Table */}
-                <hr className="my-8 border-gray-300" />
-
+        <hr className="my-8 border-gray-300" />
         
       </div>
     </div>
