@@ -346,25 +346,61 @@ const Dashboard = () => {
               <Star className="h-5 w-5 mr-2 text-yellow-600" />
               Phân bố đánh giá
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={feedbackData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ rating, percentage }) => `${rating}: ${percentage}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {feedbackData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={FEEDBACK_COLORS[index % FEEDBACK_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [value, 'Số lượng']} />
-              </PieChart>
-            </ResponsiveContainer>
+            {feedbackData.filter(item => item.count > 0).length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={feedbackData.filter(item => item.count > 0)}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ rating, percentage }) => percentage > 0 ? `${rating}: ${percentage}%` : null}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                    >
+                      {feedbackData.filter(item => item.count > 0).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={FEEDBACK_COLORS[parseInt(entry.rating.split(' ')[0]) - 1]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [value, 'Số lượng']} />
+                  </PieChart>
+                </ResponsiveContainer>
+                
+                {/* Feedback Legend */}
+                <div className="mt-4 grid grid-cols-1 gap-2">
+                  {feedbackData.filter(item => item.count > 0).map((feedback) => {
+                    const starNumber = parseInt(feedback.rating.split(' ')[0]);
+                    return (
+                      <div key={feedback.rating} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div className="flex items-center">
+                          <div 
+                            className="w-4 h-4 rounded mr-2"
+                            style={{ backgroundColor: FEEDBACK_COLORS[starNumber - 1] }}
+                          ></div>
+                          <span className="text-sm font-medium text-gray-700">
+                            {feedback.rating}
+                            {' '.repeat(starNumber).replace(/ /g, '⭐')}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {feedback.count} đánh giá ({feedback.percentage}%)
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-64 text-gray-500">
+                <div className="text-center">
+                  <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium">Chưa có đánh giá nào</p>
+                  <p className="text-sm">Đánh giá sẽ hiển thị khi có khách hàng feedback</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Transaction Count by Day */}
@@ -385,31 +421,59 @@ const Dashboard = () => {
           </div>
 
           {/* Payment Methods */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-              <DollarSign className="h-5 w-5 mr-2 text-purple-600" />
-              Phương thức thanh toán
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={stats.paymentMethods || []}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ method, count }) => `${method}: ${count}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {(stats.paymentMethods || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [value, 'Số giao dịch']} />
-              </PieChart>
-            </ResponsiveContainer>
+ <div className="bg-white rounded-xl shadow-lg p-6">
+  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+    <DollarSign className="h-5 w-5 mr-2 text-purple-600" />
+    Phương thức thanh toán
+  </h3>
+  <ResponsiveContainer width="100%" height={300}>
+    <PieChart>
+      <Pie
+        data={stats.paymentMethods || []}
+        cx="50%"
+        cy="50%"
+        labelLine={false}
+        // Remove the label prop entirely to avoid text cutoff
+        outerRadius={100} // Increased from 80 to make pie chart bigger
+        fill="#8884d8"
+        dataKey="count"
+      >
+        {(stats.paymentMethods || []).map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Tooltip 
+        formatter={(value, name, props) => [
+          `${value} giao dịch (${Math.round((value / stats.totalTransactions) * 100)}%)`, 
+          props.payload.method
+        ]} 
+      />
+    </PieChart>
+  </ResponsiveContainer>
+  
+  {/* Enhanced Payment Methods Legend */}
+  <div className="mt-4 grid grid-cols-1 gap-3">
+    {(stats.paymentMethods || []).map((method, index) => (
+      <div key={method.method} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+        <div className="flex items-center">
+          <div 
+            className="w-5 h-5 rounded mr-3"
+            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+          ></div>
+          <span className="text-sm font-semibold text-gray-800">{method.method}</span>
+        </div>
+        <div className="text-right">
+          <div className="text-sm font-medium text-gray-900">
+            {method.count} giao dịch ({Math.round((method.count / stats.totalTransactions) * 100)}%)
           </div>
+          <div className="text-xs text-gray-600">
+            {formatCurrency(method.amount)}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
         </div>
 
         {/* All Transactions Table with Pagination */}
